@@ -3,16 +3,22 @@
 import { TodoItem } from "@/components/TodoItem";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface Todo {
   id: number;
   title: string;
   completed: boolean;
+  due_date: string | null;
+  priority: "LOW" | "MEDIUM" | "HIGH";
 }
 
 export function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [priority, setPriority] = useState<"LOW" | "MEDIUM" | "HIGH">("MEDIUM");
 
   const fetchTodos = async () => {
     const token = localStorage.getItem("access_token");
@@ -32,13 +38,35 @@ export function TodoList() {
   const addTodo = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("access_token");
-    await axios.post(
-      "http://localhost:8000/api/tasks/",
-      { title: newTodo },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setNewTodo("");
-    fetchTodos();
+
+    const taskData = {
+      title: newTodo,
+      completed: false,
+      due_date: dueDate?.toISOString().split("T")[0],
+      priority: priority,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/tasks/",
+        taskData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        setNewTodo("");
+        setDueDate(null);
+        setPriority("MEDIUM");
+        fetchTodos();
+      }
+    } catch (error) {
+      console.log("Error creating task:", error);
+    }
   };
 
   const toggleTodo = async (id: number) => {
@@ -75,22 +103,44 @@ export function TodoList() {
         </span>
       </div>
 
-      <form onSubmit={addTodo} className="mb-8">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-            placeholder="O que você precisa fazer?"
+      <form onSubmit={addTodo} className="mb-8 space-y-4">
+        <input
+          type="text"
+          value={newTodo}
+          onChange={(e) => setNewTodo(e.target.value)}
+          placeholder="O que você precisa fazer?"
+          className="w-full p-3 rounded-lg bg-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+        />
+
+        <div className="flex gap-4">
+          <DatePicker
+            selected={dueDate}
+            onChange={(date) => setDueDate(date)}
+            showTimeSelect
+            dateFormat="Pp"
+            placeholderText="Selecione o prazo"
             className="flex-1 p-3 rounded-lg bg-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
           />
-          <button
-            type="submit"
-            className="bg-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all duration-200"
+
+          <select
+            value={priority}
+            onChange={(e) =>
+              setPriority(e.target.value as "LOW" | "MEDIUM" | "HIGH")
+            }
+            className="flex-1 p-3 rounded-lg bg-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
           >
-            Adicionar
-          </button>
+            <option value="LOW">Baixa Prioridade</option>
+            <option value="MEDIUM">Média Prioridade</option>
+            <option value="HIGH">Alta Prioridade</option>
+          </select>
         </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all duration-200"
+        >
+          Adicionar
+        </button>
       </form>
 
       {todos.length > 0 ? (

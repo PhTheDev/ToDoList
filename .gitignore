@@ -8,6 +8,7 @@ back-end/db.sqlite3
 back-end/media/
 back-end/static/
 back-end/.venv/
+back-end/celerybeat-schedule
 
 # Environment variables
 *.env

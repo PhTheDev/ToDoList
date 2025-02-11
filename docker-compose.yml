@@ -1,18 +1,48 @@
-version: '3.8'
-
 services:
   web:
     build:
-      context: ./back-end  # Aponta para a pasta correta onde está o Dockerfile
+      context: ./back-end
       dockerfile: Dockerfile
     container_name: django_app
     restart: always
     volumes:
-      - ./back-end:/app  # Monta a pasta do Django dentro do contêiner
-      - sqlite_data:/app/db  # Monta um diretório para o banco de dados SQLite
+      - ./back-end:/app
+      - sqlite_data:/app/db
     ports:
       - "8000:8000"
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: redis_service
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    container_name: celery_worker_service
+    command: celery -A core worker -l info
+    volumes:
+      - ./back-end:/app
+    depends_on:
+      - redis
+      - web
+
+  celery_beat:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    container_name: celery_beat_service
+    command: celery -A core beat -l info
+    volumes:
+      - ./back-end:/app
+    depends_on:
+      - redis
+      - web
 
 volumes:
   sqlite_data:
