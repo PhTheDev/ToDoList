@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./back-end  # Aponta para a pasta correta onde está o Dockerfile
+      dockerfile: Dockerfile
+    container_name: django_app
+    restart: always
+    volumes:
+      - ./back-end:/app  # Monta a pasta do Django dentro do contêiner
+      - sqlite_data:/app/db  # Monta um diretório para o banco de dados SQLite
+    ports:
+      - "8000:8000"
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+volumes:
+  sqlite_data:

@@ -1,0 +1,77 @@
+/* global.css ou styles.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variáveis Globais */
+:root {
+  --background: #121212;
+  /* Fundo escuro sólido */
+  --foreground: #f5f5f5;
+  /* Cor de texto clara */
+  --accent: #58a6ff;
+  /* Cor de destaque */
+  --secondary: #2d3748;
+}
+
+/* Aplicar o fundo escuro global */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background-color: #121212;
+  /* Cor de fundo sólida e escura */
+  font-family: 'Inter', sans-serif;
+  color: var(--foreground);
+  /* Garantir que o texto seja branco por padrão */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Para uma rolagem suave */
+}
+
+/* Estilo de animação para fade-in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out;
+}
+
+* {
+  box-sizing: border-box;
+  /* Garantir que a largura e altura dos elementos considerem o padding e border */
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

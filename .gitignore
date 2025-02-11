@@ -1,0 +1,13 @@
+# Next.js
+front-end/.next/
+front-end/node_modules/
+
+# Django
+back-end/__pycache__/
+back-end/db.sqlite3
+back-end/media/
+back-end/static/
+back-end/.venv/
+
+# Environment variables
+*.env
