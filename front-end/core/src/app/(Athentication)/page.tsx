@@ -25,6 +25,7 @@ export default function Login() {
 
       if (response.data && response.data.access) {
         localStorage.setItem("access_token", response.data.access);
+        localStorage.setItem("username", response.data.user.username);
         router.push("/todos");
       } else {
         setError("Erro no login. Tente novamente.");

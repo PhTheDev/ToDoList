@@ -11,6 +11,7 @@ interface Todo {
   title: string;
   completed: boolean;
   due_date: string | null;
+  user: string;
   priority: "LOW" | "MEDIUM" | "HIGH";
 }
 
@@ -22,12 +23,14 @@ export function TodoList() {
 
   const fetchTodos = async () => {
     const token = localStorage.getItem("access_token");
+    const user = localStorage.getItem("user");
     try {
       const response = await axios.get("http://localhost:8000/api/tasks/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+        params: { user: user }, // Filter by user
       });
       setTodos(response.data);
     } catch (error) {
@@ -38,9 +41,11 @@ export function TodoList() {
   const addTodo = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("access_token");
+    const user = localStorage.getItem("user");
 
     const taskData = {
       title: newTodo,
+      user: user,
       completed: false,
       due_date: dueDate?.toISOString().split("T")[0],
       priority: priority,
