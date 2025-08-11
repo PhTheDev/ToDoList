@@ -17,7 +17,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['completed', 'priority']
-    ordering_fields = ['due_date', 'created_at', 'priority']
+    ordering_fields = ['due_date', 'user', 'created_at', 'priority']
 
     def get_queryset(self):
         if self.request.user.is_staff:
