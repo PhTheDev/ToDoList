@@ -1,0 +1,94 @@
+services:
+  # --- Database ---
+  db_postgres:
+    image: postgres:16-alpine
+    container_name: db_${APP_CONTAINER_NAME}
+    restart: always
+    env_file: .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
+    volumes:
+      # Named volumes are better for database data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend_network
+
+  redis:
+    image: redis:alpine
+    container_name: redis_${APP_CONTAINER_NAME}
+    restart: always
+    networks:
+      - backend_network
+
+  celery_worker:
+    container_name: celery_worker_${APP_CONTAINER_NAME}
+    build:
+      context: ./test
+    restart: always
+    volumes:
+      - ./test:/home/app/django
+    env_file: .env
+    command: celery -A core worker --loglevel=info
+    networks:
+      - backend_network
+    depends_on:
+      - db_postgres
+      - redis
+
+  celery_beat:
+    container_name: celery_beat_${APP_CONTAINER_NAME}
+    build:
+      context: ./test
+    restart: always
+    volumes:
+      - ./test:/home/app/django
+      - ./staticfiles:/home/app/django/staticfiles
+      - ./media:/home/app/django/media
+    env_file:
+      - .env
+    command: celery -A core beat --loglevel=info
+    networks:
+      - backend_network
+    depends_on:
+      - db_postgres
+      - redis
+      - app
+      - celery_worker
+
+  # --- Django Application with Gunicorn ---
+  app:
+    container_name: app_${APP_CONTAINER_NAME}
+    build: ./test
+    restart: always
+    volumes:
+      - ./test:/home/app/django
+      - ./staticfiles:/home/app/django/staticfiles
+      - ./media:/home/app/django/media
+    env_file: .env
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        gunicorn core.wsgi:application --bind 0.0.0.0:${APP_INTERNAL_PORT}"
+    networks:
+      - backend_network
+      - test_global
+    depends_on:
+      - db_postgres
+    ports:
+      - "8010:${APP_INTERNAL_PORT}" # Expose Gunicorn port to host
+
+networks:
+  backend_network:
+    # Compose will create and manage this network
+    driver: bridge
+  test_global:
+    # Compose will USE but not manage this network
+    external: true
+    name: test_global_proxy
+
+volumes:
+  postgres_data: # Volume for PostgreSQL data

@@ -1,11 +1,11 @@
-from rest_framework import viewsets, filters
-from rest_framework.permissions import IsAuthenticated, BasePermission
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, filters # type: ignore
+from rest_framework.permissions import IsAuthenticated, BasePermission # type: ignore
+from django_filters.rest_framework import DjangoFilterBackend # type: ignore
 from .models import Task
 from .serializers import TaskSerializer
 
 class IsAdminOrOwner(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, obj):
         # Admin can do anything
         if request.user.is_staff:
             return True

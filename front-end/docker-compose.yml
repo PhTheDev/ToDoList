@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  next-app:
+    container_name: app_test_frontend
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    networks:
+      - test_global
+
+networks:
+  test_global:
+    external: true
+    name: test_global_proxy

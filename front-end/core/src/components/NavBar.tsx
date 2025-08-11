@@ -34,7 +34,7 @@ const Navbar = () => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://localhost:8000/api/auth/user/",
+            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/user/`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -70,11 +70,10 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-500 ${
-        scrolled || isOpen
+      className={`fixed w-full z-50 transition-all duration-500 ${scrolled || isOpen
           ? "bg-gray-900/95 backdrop-blur-xl shadow-lg"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center py-4 px-4 lg:px-8">
         {/* Logo */}
@@ -163,9 +162,8 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`w-full md:hidden transition-all duration-500 ${
-            isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-          } overflow-hidden`}
+          className={`w-full md:hidden transition-all duration-500 ${isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+            } overflow-hidden`}
         >
           <div className="py-4 space-y-4">
             <Link

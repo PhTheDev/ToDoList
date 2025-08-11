@@ -1,17 +1,23 @@
-# Usando a imagem oficial do Python
-FROM python:3.11
+FROM python:3.11-alpine
 
-# Definindo o diretório de trabalho dentro do contêiner
-WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Copiando os arquivos do projeto para dentro do contêiner
+RUN apk update && apk add gcc python3-dev musl-dev tzdata \
+    && apk add --virtual build-deps \
+    && apk add --no-cache mariadb-dev
+
+ENV TZ=America/Sao_Paulo
+RUN cp /usr/share/zoneinfo/$TZ /etc/localtime
+
+WORKDIR /home/app/django
+
+RUN pip install --upgrade pip
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# Adicione estas linhas para instalar dependências do Celery
+RUN apk add --no-cache libffi-dev openssl-dev
+RUN pip install celery[redis] django-celery-beat
+
 COPY . .
-
-# Instalando as dependências do projeto
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Expondo a porta padrão do Django
-EXPOSE 8000
-
-# Comando para rodar o servidor do Django
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -23,7 +23,7 @@ export function TodoList() {
   const fetchTodos = async () => {
     const token = localStorage.getItem("access_token");
     try {
-      const response = await axios.get("http://localhost:8000/api/tasks/", {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -48,7 +48,7 @@ export function TodoList() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/tasks/",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/tasks`,
         taskData,
         {
           headers: {
@@ -73,7 +73,7 @@ export function TodoList() {
     const token = localStorage.getItem("access_token");
     const todo = todos.find((t) => t.id === id);
     await axios.patch(
-      `http://localhost:8000/api/tasks/${id}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${id}/`,
       { completed: !todo?.completed },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -82,7 +82,7 @@ export function TodoList() {
 
   const deleteTodo = async (id: number) => {
     const token = localStorage.getItem("access_token");
-    await axios.delete(`http://localhost:8000/api/tasks/${id}/`, {
+    await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${id}/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchTodos();
